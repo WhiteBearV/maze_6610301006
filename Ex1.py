@@ -109,11 +109,11 @@ class maze:
     
     def undo_move(self):
         if not self.stack.isEmpty():
-            points = self.stack. __len__()
+            Stack.push(prev_pos)
             prev_pos = self.stack.pop()
             self.ply = prev_pos
-            self.maze[prev_pos.y][prev_pos.x] =  points 
-        return
+            self.maze[prev_pos.y][prev_pos.x] =   Stack.__len__.points
+            return
         
 
 class Stack:

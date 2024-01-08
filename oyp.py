@@ -15,13 +15,13 @@ class maze:
         self.maze = [
                     ["X", "X", "X", "X", "X", "X", "X"],
                     ["X", " ", "X", " ", "X", " ", "X"],
-                    ["X", " ", " ", " ", "X", " ", " "],
+                    ["X", " ", "X", " ", "X", " ", " "],
                     ["X", " ", "X", " ", "X", " ", "X"],
-                    ["X", " ", "X", " ", " ", " ", "X"],
+                    ["X", " ", " ", " ", " ", " ", "X"],
                     ["X", " ", "X", "X", "X", "X", "X"],
                     ]
         self.ply = pos(5, 1) #ตำแหล่งPlayerเริ่มต้น
-        self.end = pos(2, 6) #ตำแหน่งทางออก
+        self.end = pos(3, 6) #ตำแหน่งทางออก
         self.maze[self.ply.y][self.ply.x] = "P" #Player
         self.maze[self.end.y][self.end.x] = "E" #สัญญาลักษณ์ทาออก
     

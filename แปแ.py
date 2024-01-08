@@ -2,7 +2,39 @@ import heapq
 import time
 import os
 import keyboard
-import time
+
+class Stack:
+
+    def __init__(self):
+        self._top = None
+        self._size = 0
+
+    def isEmpty(self):
+        return self._top is None
+    
+    def __len__(self):
+        return self._size
+    
+    def peek(self):
+        assert not self.isEmpty(), "Cannot peek at an empty stack"
+        return self._top.item
+
+    def pop(self):
+        assert not self.isEmpty(), "Cannot pop from an empty stack"
+        node = self._top
+        self._top = self._top.next
+        self._size = self._size - 1
+        return node.item
+
+    def push(self, item):
+        self._top = _StackNode(item, self._top)
+        self._size = self._size + 1
+
+class _StackNode:
+    def __init__(self, item, link):
+        self.item = item
+        self.next = link
+
 
 class pos:
     def __init__(self) -> None:
@@ -17,8 +49,8 @@ class maze:
     def __init__(self) -> None:
         self.maze = [
                     ["X", "X", "X", "X", "X", "X", "X"],
-                    ["X", " ", " ", " ", "X", " ", "X"],
-                    ["X", " ", "X", " ", "X", " ", " "],
+                    ["X", " ", "X", " ", "X", " ", "X"],
+                    ["X", " ", " ", " ", "X", " ", " "],
                     ["X", " ", "X", " ", "X", " ", "X"],
                     ["X", " ", "X", " ", " ", " ", "X"],
                     ["X", " ", "X", "X", "X", "X", "X"],
@@ -49,58 +81,6 @@ class maze:
         print(">>>>> Congraturation!!! <<<<<")
         print("\n\n\n")
         keyboard.wait("")
-
-    def move_up(self):
-        next_move = pos(self.ply.y-1, self.ply.x)
-        if self.isInBound(next_move.y,next_move.x):
-            if self.maze[next_move.y][next_move.x] == " ":
-                self.maze[self.ply.y][self.ply.x] = " "
-                self.maze[next_move.y][next_move.x] = "P"
-                self.ply = next_move
-                time.sleep(0.25)
-            if self.maze[next_move.y][next_move.x] == "E":
-                self.printEND()
-                return False
-        return True
-    
-    def move_down(self):
-        next_move = pos(self.ply.y+1, self.ply.x)
-        if self.isInBound(next_move.y,next_move.x):
-            if self.maze[next_move.y][next_move.x] == " ":
-                self.maze[self.ply.y][self.ply.x] = " "
-                self.maze[next_move.y][next_move.x] = "P"
-                self.ply = next_move
-                time.sleep(0.25)
-            if self.maze[next_move.y][next_move.x] == "E":
-                self.printEND()
-                return False
-        return True
-
-    def move_left(self):
-        next_move = pos(self.ply.y, self.ply.x-1)
-        if self.isInBound(next_move.y,next_move.x):
-            if self.maze[next_move.y][next_move.x] == " ":
-                self.maze[self.ply.y][self.ply.x] = " "
-                self.maze[next_move.y][next_move.x] = "P"
-                self.ply = next_move
-                time.sleep(0.25)
-            if self.maze[next_move.y][next_move.x] == "E":
-                self.printEND()
-                return False
-        return True
-
-    def move_right(self):
-        next_move = pos(self.ply.y, self.ply.x+1)
-        if self.isInBound(next_move.y,next_move.x):
-            if self.maze[next_move.y][next_move.x] == " ":
-                self.maze[self.ply.y][self.ply.x] = " "
-                self.maze[next_move.y][next_move.x] = "P"
-                self.ply = next_move
-                time.sleep(0.25)
-            if self.maze[next_move.y][next_move.x] == "E":
-                self.printEND()
-                return False
-        return True
     
 
 class MazeSolver:
@@ -124,17 +104,48 @@ class MazeSolver:
                     return i, j
                 
     def find_path(self):
-        self.start = self.find_start()
+        start = self.find_start()
         self.end = self.find_end()
+        return start , self.end
 
 
     def is_valid_move(self, row, col):
-        return 0 <= row < self.rows and 0 <= col < self.cols and self.maze[row][col] != 'X'
+        if 0 <= row < self.rows and 0 <= col < self.cols and self.maze[row][col] != 'X':
+            return True
+        else:
+            return False
 
     def heuristic(self, current, goal):
         return abs(current[0] - goal[0]) + abs(current[1] - goal[1])
 
     def astar(self):
+        start_node = (self.start, 0)
+        heap = [start_node]
+        visited = set()
+
+        while heap:
+            current, cost = heapq.heappop(heap)
+
+            if current == self.end:
+                return True
+
+            if current in visited:
+                continue
+
+            visited.add(current)
+
+            row, col = current
+            directions = [(0, -1), (-1, 0), (0, 1), (1, 0)]
+
+            for dr, dc in directions:
+                new_row, new_col = row + dr, col + dc
+
+                if self.is_valid_move(new_row, new_col):
+                    new_cost = cost + 1 + self.heuristic((new_row, new_col), self.end)
+                    heapq.heappush(heap, ((new_row, new_col), new_cost))
+
+        return False    
+    """def astar(self):
         start_node = (self.start, 0)
         heap = [start_node]
         visited = set()
@@ -160,72 +171,69 @@ class MazeSolver:
                     new_cost = cost + 1 + self.heuristic((new_row, new_col), self.end)
                     heapq.heappush(heap, ((new_row, new_col), new_cost))
 
-        return False
+        return False"""
 
     def auto_solve(self):
         if self.astar():
-            print("Auto-solving the maze:")
-            current = self.start
-            ed = self.end
-            while current != self.end:
-                print("Moving to", current)
-                time.sleep(0.25)  # Optional: Add a delay for visualization
-                current = self.move_towards_end(current)
+            current = self.find_start()
+            ed = self.find_end()
+            while current != ed:  
+                maze.print(self)
+                print("Auto-solving the maze:")  
+                time.sleep(1.25)  # Optional: Add a delay for visualization
+                current = self.move_towards_end_new(current)
                 next_move = pos(current,ed)
-            if self.isInBound(next_move.y,next_move.x):
+            if self.is_valid_move(next_move.y,next_move.x):
                 if self.maze[next_move.y][next_move.x] == " ":
                     self.maze[self.ply.y][self.ply.x] = " "
                     self.maze[next_move.y][next_move.x] = "P"
                     self.ply = next_move
-                    time.sleep(0.25)
-                    if self.maze[next_move.y][next_move.x] == "E":
+
+                    time.sleep(1.25)
+                    if self.maze[next_move.y][next_move.x] == "E" :
                         self.printEND()
 
-        
-    def move_towards_end(self, current):
+    def auto_solve_new(self):
+        if self.astar():
+            current = self.find_start()
+            end = self.find_end()
+        while current != end:
+            maze.print(self)
+            print("Auto-solving the maze:")
+            time.sleep(1.50)
+            current = self.move_towards_end_new(current)
+            next_move = pos(current[0], current[1])
+            if self.is_valid_move(next_move.y, next_move.x) and self.maze[next_move.y][next_move.x] == "E":
+                self.maze.printEND()
+                break
+
+
+            
+
+    def move_towards_end_new(self, current):
         row, col = current
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-
         for dr, dc in directions:
             new_row, new_col = row + dr, col + dc
-
             if self.is_valid_move(new_row, new_col) and self.maze[new_row][new_col] == ' ':
-                self.maze[row][col] = ' '
+                self.maze[row][col] = '1'
                 self.maze[new_row][new_col] = 'P'
 
+                print(dr, dc)
+
                 return new_row, new_col
-            
-    def auto_move(self):
-        path = self.find_path()
-        if path:
-            for step in path[1]:  # ข้ามตำแหน่งเริ่มต้น
-                direction = " "
-                if step.y < self.start.y:
-                    direction = "up"
-                    maze.move_up()
-                elif step.y > self.start.y:
-                    direction = "down"
-                    maze.move_down()
-                elif step.x < self.start.x:
-                    direction = "left"
-                    maze.move_left()
-                elif step.x > self.start.x:
-                    direction = "right"
-                    maze.move_right()
-
-                getattr(self, f"move_{direction}")  # เรียกฟังก์ชันเคลื่อนที่ตามทิศทาง
-                self.print()  # พิมพ์แผนที่หลังจากเคลื่อนที่
-                time.sleep(0.25)  # หน่วงเวลาเพื่อให้เห็นการเคลื่อนที่
-
+        return current   
 
 # Example Usage:
 if __name__ == '__main__':
 
     m = maze()
     m.print()
-
-    while True:
-        solver = MazeSolver(m.maze)
-        solver.auto_move()
-        m.print
+    """s = MazeSolver(m.maze)
+    a,b = s.find_path()
+    print(a)
+    print(b)"""
+    solver = MazeSolver(m.maze)
+    solver.auto_solve_new()
+    m.print
 
