@@ -81,7 +81,59 @@ class maze:
         print(">>>>> Congraturation!!! <<<<<")
         print("\n\n\n")
         keyboard.wait("")
+
+
+    def move_up(self):
+        next_move = pos(self.ply.y-1, self.ply.x)
+        if self.isInBound(next_move.y,next_move.x):
+            if self.maze[next_move.y][next_move.x] == " ":
+                self.maze[self.ply.y][self.ply.x] = " "
+                self.maze[next_move.y][next_move.x] = "P"
+                self.ply = next_move
+                time.sleep(1)
+            if self.maze[next_move.y][next_move.x] == "E":
+                self.printEND()
+                return False
+        return True
     
+    def move_down(self):
+        next_move = pos(self.ply.y + 1, self.ply.x)
+        if self.isInBound(next_move.y, next_move.x):
+            if self.maze[next_move.y][next_move.x] == (" "):
+                self.maze[self.ply.y][self.ply.x] = " "
+                self.maze[next_move.y][next_move.x] = "P"
+                self.ply = next_move
+                time.sleep(1)
+            if self.maze[next_move.y][next_move.x] == "E":
+                self.printEND()
+                return False
+        return True
+
+    def move_left(self):
+        next_move = pos(self.ply.y, self.ply.x-1)
+        if self.isInBound(next_move.y,next_move.x):
+            if self.maze[next_move.y][next_move.x] == " ":
+                self.maze[self.ply.y][self.ply.x] = " "
+                self.maze[next_move.y][next_move.x] = "P"
+                self.ply = next_move
+                time.sleep(1)
+            if self.maze[next_move.y][next_move.x] == "E":
+                self.printEND()
+                return False
+        return True
+
+    def move_right(self):
+        next_move = pos(self.ply.y, self.ply.x+1)
+        if self.isInBound(next_move.y,next_move.x):
+            if self.maze[next_move.y][next_move.x] == " ":
+                self.maze[self.ply.y][self.ply.x] = " "
+                self.maze[next_move.y][next_move.x] = "P"
+                self.ply = next_move
+                time.sleep(1)
+            if self.maze[next_move.y][next_move.x] == "E":
+                self.printEND()
+                return False
+        return True
 
 class MazeSolver:
     def __init__(self, maze):
@@ -102,18 +154,8 @@ class MazeSolver:
             for j in range(self.cols):
                 if self.maze[i][j] == 'E':
                     return i, j
-                
-    def find_path(self):
-        start = self.find_start()
-        self.end = self.find_end()
-        return start , self.end
 
 
-    def is_valid_move(self, row, col):
-        if 0 <= row < self.rows and 0 <= col < self.cols and self.maze[row][col] != 'X':
-            return True
-        else:
-            return False
 
     def heuristic(self, current, goal):
         return abs(current[0] - goal[0]) + abs(current[1] - goal[1])
@@ -127,7 +169,7 @@ class MazeSolver:
             current, cost = heapq.heappop(heap)
 
             if current == self.end:
-                return True
+                return False
 
             if current in visited:
                 continue
@@ -140,99 +182,93 @@ class MazeSolver:
             for dr, dc in directions:
                 new_row, new_col = row + dr, col + dc
 
-                if self.is_valid_move(new_row, new_col):
+                if maze.isInBound(self,new_col,new_row):
                     new_cost = cost + 1 + self.heuristic((new_row, new_col), self.end)
                     heapq.heappush(heap, ((new_row, new_col), new_cost))
 
-        return False    
-    """def astar(self):
-        start_node = (self.start, 0)
-        heap = [start_node]
-        visited = set()
-
-        while heap:
-            current, cost = heapq.heappop(heap)
-
-            if current == self.end:
-                return True
-
-            if current in visited:
-                continue
-
-            visited.add(current)
-
-            row, col = current
-            directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-
-            for dr, dc in directions:
-                new_row, new_col = row + dr, col + dc
-
-                if self.is_valid_move(new_row, new_col):
-                    new_cost = cost + 1 + self.heuristic((new_row, new_col), self.end)
-                    heapq.heappush(heap, ((new_row, new_col), new_cost))
-
-        return False"""
-
-    def auto_solve(self):
-        if self.astar():
-            current = self.find_start()
-            ed = self.find_end()
-            while current != ed:  
-                maze.print(self)
-                print("Auto-solving the maze:")  
-                time.sleep(1.25)  # Optional: Add a delay for visualization
-                current = self.move_towards_end_new(current)
-                next_move = pos(current,ed)
-            if self.is_valid_move(next_move.y,next_move.x):
-                if self.maze[next_move.y][next_move.x] == " ":
-                    self.maze[self.ply.y][self.ply.x] = " "
-                    self.maze[next_move.y][next_move.x] = "P"
-                    self.ply = next_move
-
-                    time.sleep(1.25)
-                    if self.maze[next_move.y][next_move.x] == "E" :
-                        self.printEND()
+        return True
 
     def auto_solve_new(self):
         if self.astar():
-            current = self.find_start()
-            end = self.find_end()
-        while current != end:
+            stack = Stack()
+            visited = set()
+        while True:
+            ceakpoint = self.find_start()
+            m.ply = pos(ceakpoint[0],ceakpoint[1])
+            if ceakpoint not in visited:
+                visited.add(ceakpoint)
+            
+            if m.maze[m.ply.y - 1][m.ply.x] != "X" and (m.ply.y - 1, m.ply.x) not in visited:
+                m.move_up()
+                m.print()
+                stack.push(ceakpoint)
+                print("MOVE_UP")    
+
+            elif m.maze[m.ply.y + 1][m.ply.x] != "X" and (m.ply.y + 1, m.ply.x) not in visited:
+                m.move_down()
+                m.print()
+                stack.push(ceakpoint)
+                print("MOVE_DOWN")
+
+            elif m.maze[m.ply.y][m.ply.x + 1] != "X" and (m.ply.y, m.ply.x + 1) not in visited:
+                m.move_right()
+                m.print()
+                stack.push(ceakpoint)
+
+            elif m.maze[m.ply.y][m.ply.x - 1] != "X" and (m.ply.y, m.ply.x - 1) not in visited:
+                m.move_left()
+                m.print()
+                stack.push(ceakpoint)
+                print("MOVE_LEFT")
+
+            else:
+                Noway = True
+                while not stack.isEmpty() and Noway == True : # and m.maze[m.ply.y][m.ply.x] == "P" :
+                    lastmove = stack.pop()
+                    visited.remove(lastmove)
+                    m.maze[ceakpoint[0]][ceakpoint[1]] = "N"
+                    m.ply = pos(lastmove[0],lastmove[1])
+                    m.maze[m.ply.y][m.ply.x] = "P"
+                    m.print()
+                    print('Nope No Pass')
+                    Noway = False
+
+    def auto_solve_old(self):
+        if self.astar():
+            ceakpoin = self.find_start()
+        while True :
             maze.print(self)
             print("Auto-solving the maze:")
             time.sleep(1.50)
-            current = self.move_towards_end_new(current)
-            next_move = pos(current[0], current[1])
-            if self.is_valid_move(next_move.y, next_move.x) and self.maze[next_move.y][next_move.x] == "E":
+            ceakpoin = self.move_towards_end_new(ceakpoin)
+            next_move = pos(ceakpoin[0], ceakpoin[1])
+
+            if maze.isInBound(self,next_move.y, next_move.x) and self.maze[next_move.y][next_move.x] == "E":
                 self.maze.printEND()
-                break
+
 
 
             
 
-    def move_towards_end_new(self, current):
-        row, col = current
-        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        for dr, dc in directions:
-            new_row, new_col = row + dr, col + dc
-            if self.is_valid_move(new_row, new_col) and self.maze[new_row][new_col] == ' ':
+    def move_towards_end_new(self, ceakpoin):
+        stack = Stack()
+        visited = set()
+        while True:
+            row, col = ceakpoin
+            directions = [ceakpoin[0],ceakpoin[1]]
+            stack.push(directions)
+            if maze.isInBound(self,row,col) and self.maze[row][col] == ' ':
                 self.maze[row][col] = '1'
-                self.maze[new_row][new_col] = 'P'
+                self.maze[row][col] = 'P'
 
-                print(dr, dc)
-
-                return new_row, new_col
-        return current   
+                return row, col
+            return ceakpoin  
 
 # Example Usage:
 if __name__ == '__main__':
 
     m = maze()
     m.print()
-    """s = MazeSolver(m.maze)
-    a,b = s.find_path()
-    print(a)
-    print(b)"""
     solver = MazeSolver(m.maze)
     solver.auto_solve_new()
     m.print
